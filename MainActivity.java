@@ -2,13 +2,9 @@ package com.example.wunna.timetable;
 
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
-import android.view.View;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
+import android.util.Log;
 import android.widget.ListView;
-import android.widget.Toast;
-
-import java.util.ArrayList;
+import android.widget.SeekBar;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -17,23 +13,35 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        ListView myListView=(ListView) findViewById(R.id.myListView);
-        final ArrayList<String> myFamily=new ArrayList<String>();
-        myFamily.add("Kel vin");
-        myFamily.add("Alice");
-        myFamily.add("Charly");
-        myFamily.add("Kol Kol");
-        myFamily.add("Co Co");
-        ArrayAdapter<String> arrayAdapter=new ArrayAdapter<String>(this,android.R.layout.simple_list_item_1,myFamily);
-        myListView.setAdapter(arrayAdapter);
-        myListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+        SeekBar timeSeekBar= (SeekBar) findViewById(R.id.seekBar);
+        ListView timeList=(ListView) findViewById(R.id.timeTableList);
+        timeSeekBar.setMax(20);
+        timeSeekBar.setProgress(10);
+        timeSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
-            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-             //   Log.i("person",myFamily.get(i));
-                Toast.makeText(getApplicationContext(),"Hello"+myFamily.get(i),Toast.LENGTH_LONG).show();
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                int min=1;
+                int timeTable;
+                if (progress<min){
+                    timeTable=min;
+                }
+                else {
+                    timeTable=progress;
+                }
+                Log.i("Seek Bar value", String.valueOf(timeTable));
+
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+
             }
         });
-
 
     }
 }
