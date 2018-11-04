@@ -1,41 +1,66 @@
-package com.example.wunna.timetable;
+package com.example.wunna.web;
 
-import android.os.Bundle;
-import android.os.CountDownTimer;
+import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
+import android.os.Bundle;
 import android.util.Log;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.concurrent.ExecutionException;
 
 public class MainActivity extends AppCompatActivity {
 
+    public class DownloadTask extends AsyncTask<String,Void,String>{
 
+        @Override
+        protected String doInBackground(String... strings) {
+            String result="";
+            URL url;
+            HttpURLConnection urlConnection=null;
+            try
+            {
+                url=new URL(strings[0]);
+                urlConnection=(HttpURLConnection) url.openConnection();
+                InputStream inputStream=urlConnection.getInputStream();
+                InputStreamReader reader=new InputStreamReader(inputStream);
+                int data=reader.read();
+                while (data!=-1){
+                    char current=(char) data;
+                    result+=current;
+                    data=reader.read();
+                }
+                return result;
+            } catch (MalformedURLException e) {
+                e.printStackTrace();
+                return "fail";
+            } catch (IOException e) {
+                e.printStackTrace();
+                return "fail";
+            }
+
+
+
+        }
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
-        new CountDownTimer(10000,1000){
-            @Override
-            public void onTick(long millionsecondUntilDone) {
-                Log.i("Second left", String.valueOf(millionsecondUntilDone/1000));
-            }
-
-            @Override
-            public void onFinish() {
-            Log.i("Done","Timer finished");
-            }
-        }.start();
-
-//       final Handler handle=new Handler();
-//        Runnable run=new Runnable() {
-//            @Override
-//            public void run() {
-//                Log.i("delay","1s");
-//                handle.postDelayed(this,1000);
-//
-//            }
-//        };
-//        handle.post(run);
-
+        DownloadTask task=new DownloadTask();
+        String result=null;
+        try {
+             result=task.execute("https://www.ecowebhosting.co.uk/").get();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } catch (ExecutionException e) {
+            e.printStackTrace();
+        }
+        Log.i("content",result);
     }
 }
