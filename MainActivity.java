@@ -1,13 +1,16 @@
 package com.example.wunna.web;
 
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.util.Log;
+import android.support.v7.app.AppCompatActivity;
+import android.view.View;
+import android.widget.Button;
+import android.widget.ImageView;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -15,52 +18,57 @@ import java.util.concurrent.ExecutionException;
 
 public class MainActivity extends AppCompatActivity {
 
-    public class DownloadTask extends AsyncTask<String,Void,String>{
+    Button download;
+    ImageView downloadImage;
+
+    public class ImageDownloader extends AsyncTask<String,Void,Bitmap>{
 
         @Override
-        protected String doInBackground(String... strings) {
-            String result="";
-            URL url;
-            HttpURLConnection urlConnection=null;
-            try
-            {
-                url=new URL(strings[0]);
-                urlConnection=(HttpURLConnection) url.openConnection();
-                InputStream inputStream=urlConnection.getInputStream();
-                InputStreamReader reader=new InputStreamReader(inputStream);
-                int data=reader.read();
-                while (data!=-1){
-                    char current=(char) data;
-                    result+=current;
-                    data=reader.read();
-                }
-                return result;
+        protected Bitmap doInBackground(String... urls) {
+
+            try {
+                URL url=new URL(urls[0]);
+                HttpURLConnection connection=(HttpURLConnection)url.openConnection();
+                connection.connect();
+                InputStream inputStream=connection.getInputStream();
+                Bitmap bitmap= BitmapFactory.decodeStream(inputStream);
+                return bitmap;
+
             } catch (MalformedURLException e) {
                 e.printStackTrace();
-                return "fail";
             } catch (IOException e) {
                 e.printStackTrace();
-                return "fail";
             }
-
-
-
+            return null;
         }
+    }
+
+
+    public void downloadImage(View view){
+        //URL https://i.pinimg.com/originals/c7/43/a5/c743a5c03efdf60b1e57f22087a288ea.jpg
+
+        ImageDownloader task=new ImageDownloader();
+        Bitmap myImage;
+        try {
+            myImage=task.execute("https://i.pinimg.com/originals/c7/43/a5/c743a5c03efdf60b1e57f22087a288ea.jpg").get();
+            downloadImage.setImageBitmap(myImage);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } catch (ExecutionException e) {
+            e.printStackTrace();
+        }
+
+
     }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        DownloadTask task=new DownloadTask();
-        String result=null;
-        try {
-             result=task.execute("https://www.ecowebhosting.co.uk/").get();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        } catch (ExecutionException e) {
-            e.printStackTrace();
-        }
-        Log.i("content",result);
+        download= (Button) findViewById(R.id.button);
+        downloadImage= (ImageView) findViewById(R.id.imageView);
+
+
+
     }
 }
